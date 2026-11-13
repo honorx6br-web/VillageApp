@@ -28,8 +28,7 @@ jobs:
           mkdir -p app/src/main/assets app/src/main/java/com/village/tracker
           mkdir -p app/src/main/res/values app/src/main/res/drawable app/src/main/res/mipmap-anydpi-v26
           mkdir -p app/src/main/res/layout app/src/main/res/xml
-          src=village.html
-          [ -f "$src" ] || src=$(ls village*.html | head -n 1)
+          src=$(ls village*.html | head -n 1)
           cp "$src" app/src/main/assets/index.html
 
           cat > settings.gradle <<'EOF'
@@ -61,8 +60,8 @@ jobs:
               applicationId 'com.village.tracker'
               minSdk 26
               targetSdk 34
-              versionCode 2
-              versionName '2.0'
+              versionCode 3
+              versionName '2.1'
             }
             compileOptions {
               sourceCompatibility JavaVersion.VERSION_17
@@ -74,6 +73,8 @@ jobs:
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32"/>
+            <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
             <application
               android:label="Village Tracker"
               android:icon="@mipmap/ic_launcher"
@@ -184,6 +185,7 @@ jobs:
           import android.content.ComponentName;
           import android.content.Context;
           import android.content.Intent;
+          import android.os.Build;
           import android.os.SystemClock;
           import android.view.View;
           import android.widget.RemoteViews;
@@ -275,8 +277,20 @@ jobs:
                 new Intent(c, VillageWidget.class).setAction(REFRESH),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
               if (am == null) return;
-              if (next > 0) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next + 1000, p);
-              else am.cancel(p);
+              if (next <= 0) {
+                am.cancel(p);
+                return;
+              }
+              long at = next + 300;
+              try {
+                if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms()) {
+                  am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, p);
+                } else {
+                  am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, p);
+                }
+              } catch (SecurityException x) {
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, p);
+              }
             }
           }
           EOF
