@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-t="dark"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Village</title>
+<style>
+:root{--bg:#f2f2f7;--c:#fff;--c2:#e9e9ee;--sep:#d1d1d6;--t:#000;--s:#6c6c70;--b:#007aff;--g:#34c759;--o:#ff9500;--r:#ff3b30;--bar:rgba(249,249,249,.88)}
+:root[data-t=dark]{--bg:#000;--c:#1c1c1e;--c2:#2c2c2e;--sep:#38383a;--t:#fff;--s:#8e8e93;--b:#0a84ff;--g:#30d158;--o:#ff9f0a;--r:#ff453a;--bar:rgba(28,28,30,.88)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg)}
+body{color:var(--t);font:16px/1.4 -apple-system,"SF Pro Text",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;transition:transform .12s,opacity .12s}
+button:active{transform:scale(.96);opacity:.8}
+#splash,#ob{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:9;padding:24px;text-align:center}
+#splash svg{width:104px;height:104px;animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
+.brand{font-size:1.9rem;font-weight:800;letter-spacing:-.03em;margin-top:16px;animation:fade .8s}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.orb{width:120px;height:120px;border-radius:34px;display:grid;place-items:center;font-size:3.4rem;background:linear-gradient(135deg,#0a84ff,#5e5ce6);margin-bottom:26px;box-shadow:0 14px 36px rgba(10,132,255,.35)}
+#ob h2{font-size:1.7rem;letter-spacing:-.02em;margin:0 0 8px}#ob p{color:var(--s);max-width:300px;margin:0 0 24px}
+.dots{display:flex;gap:7px;margin-bottom:22px}.dots i{width:7px;height:7px;border-radius:9px;background:var(--sep);transition:.25s}.dots i.on{width:22px;background:var(--b)}
+#main{display:flex;flex-direction:column;height:100%}
+#view{flex:1;overflow-y:auto;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 110px;max-width:640px;width:100%;margin:0 auto}
+#view.a>*{animation:in .3s both}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:.5px solid var(--sep)}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--s);font-size:.68rem;font-weight:600;flex:1}
+.nb svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nb.on{color:var(--b)}
+.large{font-size:2.15rem;font-weight:800;letter-spacing:-.03em}
+.sub{color:var(--s);font-size:.84rem;margin:2px 0 16px}
+.hd{font-size:.74rem;color:var(--s);text-transform:uppercase;letter-spacing:.06em;margin:18px 16px 7px}
+.grp{background:var(--c);border-radius:14px;overflow:hidden}
+.li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:.5px solid var(--sep)}
+.li:first-child{border-top:0}
+.n{font-weight:600}.s{color:var(--s);font-size:.78rem;font-weight:400}
+.tm{font-weight:700;font-variant-numeric:tabular-nums;color:var(--o);text-align:right;white-space:nowrap}
+.tm.d{color:var(--g)}.tm.x{color:var(--s)}
+.pg{height:4px;background:var(--c2);border-radius:2px;margin-top:8px;overflow:hidden}
+.pg i{display:block;height:100%;background:var(--o);border-radius:2px}
+.hero{border-radius:22px;padding:20px;color:#fff;background:linear-gradient(135deg,#0a84ff,#5e5ce6 70%,#bf5af2);box-shadow:0 14px 34px rgba(94,92,230,.35)}
+.hl{font-size:.7rem;font-weight:700;letter-spacing:.1em;opacity:.85}
+.big{font-size:2.5rem;font-weight:800;letter-spacing:-.03em;margin:6px 0 2px}.hero .tm{color:#fff;text-align:left}
+.hs{opacity:.85;font-size:.84rem}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--c);border-radius:16px;padding:14px;text-align:left}
+.card .tm{text-align:left;font-size:1.2rem;margin-top:8px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--c);border-radius:14px;padding:12px 6px;text-align:center}
+.tile b{display:block;font-size:1.55rem;font-weight:800}.tile span{font-size:.66rem;color:var(--s);font-weight:600}
+.seg{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none}.seg::-webkit-scrollbar{display:none}
+.chip{flex:none;border-radius:999px;padding:8px 15px;background:var(--c);font-size:.86rem;font-weight:600}
+.chip.on{background:var(--b);color:#fff}
+.sw{display:flex;background:var(--c2);border-radius:10px;padding:2px;width:100%}
+.sw button{flex:1;padding:7px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--s)}.sw .on{background:var(--c);color:var(--t);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.btn{display:block;width:100%;border-radius:14px;padding:15px;font-weight:700;text-align:center}
+.btn.fill{background:var(--b);color:#fff;margin-top:14px}.btn.ghost{color:var(--b)}.btn.red{color:var(--r);background:var(--c);margin-top:12px}
+input,textarea{width:100%;border:0;border-radius:10px;background:var(--c2);color:var(--t);font:inherit;padding:10px 12px}
+textarea{height:100px;font-size:.8rem;margin-top:10px}
+.err{color:var(--r);font-size:.86rem;margin:10px 16px 0}
+.empty{text-align:center;padding:40px 10px;color:var(--s)}.empty svg{width:84px;height:84px;margin-bottom:12px}.empty .n{color:var(--t);font-size:1.15rem}
+.step{display:flex;gap:12px;padding:12px 16px;border-top:.5px solid var(--sep);font-size:.9rem}.step:first-child{border-top:0}
+.step i{flex:none;width:24px;height:24px;border-radius:99px;background:var(--b);color:#fff;font-style:normal;font-weight:700;font-size:.8rem;display:grid;place-items:center}
+</style></head><body>
+<div id="splash"></div><div id="ob" hidden></div>
+<div id="main" hidden><div id="view"></div><nav id="nav"></nav></div>
+<script>
+var CAT={buildings:"Buildings",heroes:"Heroes",units:"Lab: Troops",siege_machines:"Lab: Siege",spells:"Lab: Spells",pets:"Pets",equipment:"Equipment",traps:"Traps",buildings2:"Builder Base",heroes2:"Builder Heroes",units2:"Builder Troops"};
+var NAMES={1000001:"Town Hall",28000000:"Barbarian King",28000001:"Archer Queen",28000002:"Grand Warden",28000004:"Royal Champion",28000006:"Minion Prince",4000000:"Barbarian",4000001:"Archer",4000002:"Goblin",4000003:"Giant",4000004:"Wall Breaker",4000005:"Balloon",4000006:"Wizard",4000007:"Healer",4000008:"Dragon",4000009:"P.E.K.K.A",4000010:"Minion",4000011:"Hog Rider",4000012:"Valkyrie",4000013:"Golem",4000015:"Witch",4000017:"Lava Hound",4000022:"Bowler",4000023:"Baby Dragon",4000024:"Miner",4000031:"Electro Dragon",26000000:"Lightning Spell",26000001:"Healing Spell",26000002:"Rage Spell",26000003:"Jump Spell",26000005:"Freeze Spell",26000009:"Poison Spell",26000010:"Earthquake Spell",26000011:"Haste Spell",26000016:"Clone Spell",26000017:"Skeleton Spell",26000028:"Bat Spell",73000000:"L.A.S.S.I"};
+var HEROES={28000000:1,28000001:1,28000002:1,28000004:1,28000006:1};
+var ICON={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',accts:'<path d="M4 6h16M4 12h16M4 18h10"/>',imp:'<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/>',set:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'};
+var LOGO='<svg viewBox="0 0 108 108"><rect width="108" height="108" rx="26" fill="#1b3560"/><path d="M54,24 L80,33 L80,56 C80,70 68,80 54,86 C40,80 28,70 28,56 L28,33 Z" fill="#ffb820"/><path d="M54,29 L75,36 L75,55 C75,66 66,74 54,80 C42,74 33,66 33,55 L33,36 Z" fill="#f0960a"/><path d="M43,46 L65,46 M54,46 L54,66" stroke="#14243d" stroke-width="7" stroke-linecap="round" fill="none"/></svg>';
+var S={accs:[],cur:0,tab:"home",theme:"dark",ob:0},arm=0,slide=0;
+for(var q=0;q<6;q++)S.accs.push({name:"Account "+(q+1),data:null});
+var $=function(i){return document.getElementById(i)};
+var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+function fmt(ms){if(ms<=0)return"End";var s=Math.floor(ms/1e3),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?d+"d "+h+"h "+m+"m":h?h+"h "+m+"m":m+"m "+(s%60)+"s"}
+function dt(ms,o){return new Date(ms).toLocaleString([],o||{weekday:"short",hour:"numeric",minute:"2-digit"})}
+function theme(){var t=S.theme==="system"?(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"):S.theme;document.documentElement.dataset.t=t}
+function save(){
+  try{localStorage.setItem("village-v3",JSON.stringify(S))}catch(e){}
+  try{if(window.AndroidClip&&AndroidClip.saveWidget)AndroidClip.saveWidget(JSON.stringify(S.accs.map(function(a){return{n:a.name,e:a.data?a.data.track:0}})))}catch(e){}
+}
+function parse(txt){
+  var j=JSON.parse(txt),ts=j.timestamp||Math.floor(Date.now()/1e3),ups=[],heroes=[],th=0,counts={},track=0;
+  Object.keys(j).forEach(function(k){var a=j[k];if(!Array.isArray(a))return;
+    a.forEach(function(it){if(!it||typeof it!=="object"||it.data==null)return;
+      var nm=NAMES[it.data]||("Item #"+it.data);counts[k]=(counts[k]||0)+(it.cnt||1);
+      if(it.data===1000001)th=it.lvl;
+      if(HEROES[it.data])heroes.push({name:nm,lvl:it.lvl,timer:it.timer||0});
+      if(it.timer>0){var e=(ts+it.timer)*1e3;ups.push({name:nm,cat:CAT[k]||k,lvl:it.lvl,total:it.timer,end:e});if(!track||e<track)track=e}
+    })});
+  return{tag:j.tag||"",th:th,ts:ts*1e3,ups:ups,heroes:heroes,counts:counts,track:track};
+}
+function demo(){
+  var n=Math.floor(Date.now()/1e3),H=3600,mk=function(tag,th,b,he,u,p){return JSON.stringify({tag:tag,timestamp:n,buildings:[{data:1000001,lvl:th}].concat(b.map(function(x,i){return{data:1000050+i,lvl:2+i,timer:x*H}})),heroes:he.map(function(x,i){return{data:[28000000,28000001,28000002][i],lvl:50+i*3,timer:x*H}}),units:u.map(function(x,i){return{data:4000008+i,lvl:6,timer:x*H}}),pets:[{data:73000000,lvl:1,timer:p*H}]})};
+  var set=[mk("#DEMO1",14,[5.5,14.8,30],[0,40],[12],2.8),mk("#DEMO2",12,[8,21],[26],[],0),mk("#DEMO3",16,[1.2,60],[18,0],[9],0)];
+  set.forEach(function(t,i){S.accs[i].data=parse(t)});save();S.tab="home";show(true);
+}
+function tabsHtml(){return['home','accts','imp','set'].map(function(k,i){return'<button class="nb '+(S.tab===k?'on':'')+'" data-tab="'+k+'"><svg viewBox="0 0 24 24">'+ICON[k]+'</svg><span>'+['Home','Accounts','Import','Settings'][i]+'</span></button>'}).join("")}
+function acctCard(a,i,now){var d=a.data,t='<div class="tm x">&mdash;</div>',sub="No data";
+  if(d){sub="TH"+(d.th||"?")+" &middot; "+d.ups.filter(function(u){return u.end>now}).length+" upgrading";if(d.track)t='<div class="tm '+(d.track<=now?'d':'')+'" data-end="'+d.track+'">'+fmt(d.track-now)+'</div>'}
+  return'<button class="card" data-go="'+i+'"><div class="n">'+esc(a.name)+'</div><div class="s">'+sub+'</div>'+t+'</button>'}
+function vHome(){
+  var now=Date.now(),best=null,act=0,cnt=0;
+  S.accs.forEach(function(a,i){var d=a.data;if(!d)return;cnt++;act+=d.ups.filter(function(u){return u.end>now}).length;if(d.track>now&&(!best||d.track<best.e))best={e:d.track,n:a.name,i:i}});
+  var h='<div class="large">Village</div><div class="sub">'+(cnt?act+' upgrades running across '+cnt+' account'+(cnt>1?'s':''):'Track all six of your villages')+'</div>';
+  if(!cnt)return h+'<div class="empty">'+LOGO+'<div class="n">Nothing here yet</div><p>Import a village from the game, or explore with sample data.</p><button class="btn fill" data-act="imp">Import a village</button><button class="btn ghost" data-act="demo">Load sample data</button></div>';
+  h+=best?'<button class="hero" style="width:100%;text-align:left" data-go="'+best.i+'"><div class="hl">NEXT TO FINISH &middot; '+esc(best.n).toUpperCase()+'</div><div class="big tm" data-end="'+best.e+'">'+fmt(best.e-now)+'</div><div class="hs">Ends '+dt(best.e)+'</div></button>':'<div class="hero"><div class="hl">ALL CLEAR</div><div class="big">No timers</div></div>';
+  return h+'<div class="hd">Accounts</div><div class="cards">'+S.accs.map(function(a,i){return acctCard(a,i,now)}).join("")+'</div>';
+}
+function vAccts(){
+  var h='<div class="large">Accounts</div><div class="sub" id="upd"></div><div class="seg">'+S.accs.map(function(a,i){return'<button class="chip '+(S.cur===i?'on':'')+'" data-go="'+i+'">'+esc(a.name)+(a.data&&a.data.th?' <small>TH'+a.data.th+'</small>':'')+'</button>'}).join("")+'</div>';
+  var D=S.accs[S.cur].data,now=Date.now();
+  if(!D)return h+'<div class="empty"><div class="n">No data for this account</div><p>Import your village to see it here.</p><button class="btn fill" data-act="imp">Import</button></div>';
+  var ups=D.ups.slice().sort(function(a,b){return a.end-b.end}),act=ups.filter(function(u){return u.end>now});
+  h=h.replace('id="upd"','id="upd"')+'';
+  h=h.replace('<div class="sub" id="upd"></div>','<div class="sub">Snapshot '+dt(D.ts,{dateStyle:"medium",timeStyle:"short"})+(D.tag?" &middot; "+esc(D.tag):"")+'</div>');
+  h+='<div class="tiles"><div class="tile"><b>'+(D.th||"?")+'</b><span>TOWN HALL</span></div><div class="tile"><b>'+act.length+'</b><span>UPGRADING</span></div><div class="tile"><b>'+(ups.length-act.length)+'</b><span>FINISHED</span></div></div>';
+  h+='<div class="hd">Upgrade timers</div><div class="grp">'+(ups.length?'':'<div class="li"><span class="s">No upgrades running</span></div>');
+  ups.forEach(function(u){var left=u.end-now,p=Math.min(100,Math.max(0,100-left/(u.total*1e3)*100));
+    h+='<div class="li"><div style="flex:1;min-width:0"><div class="n">'+esc(u.name)+' <span class="s">to Lv '+(u.lvl+1)+'</span></div><div class="s">'+esc(u.cat)+' &middot; ends '+dt(u.end)+'</div><div class="pg"><i style="width:'+p+'%"></i></div></div><div class="tm '+(left<=0?'d':'')+'" data-end="'+u.end+'">'+fmt(left)+'</div></div>'});
+  h+='</div>';
+  if(D.heroes.length){h+='<div class="hd">Heroes</div><div class="grp">'+D.heroes.map(function(x){return'<div class="li"><span class="n">'+esc(x.name)+'</span><span class="s">Level '+x.lvl+(x.timer>0?' &middot; upgrading':'')+'</span></div>'}).join("")+'</div>'}
+  var ck=Object.keys(D.counts);
+  if(ck.length)h+='<div class="hd">Overview</div><div class="grp">'+ck.map(function(k){return'<div class="li"><span>'+esc(CAT[k]||k)+'</span><span class="s">'+D.counts[k]+'</span></div>'}).join("")+'</div>';
+  return h;
+}
+function vImp(){return'<div class="large">Import</div><div class="sub">Bring a village in from Clash of Clans</div><button class="btn fill" style="margin-top:0" data-act="paste">Import from Clipboard</button><button class="btn ghost" data-act="manual">Paste manually</button><div id="box" hidden><textarea id="ta" placeholder="Paste village JSON here"></textarea><button class="btn fill" data-act="load">Load</button></div><div class="err" id="err" hidden></div><div class="hd">How it works</div><div class="grp"><div class="step"><i>1</i><span>In the game open Settings, then Data Export.</span></div><div class="step"><i>2</i><span>Tap Copy next to Export Village data in JSON format.</span></div><div class="step"><i>3</i><span>Come back here and tap Import from Clipboard.</span></div><div class="step"><i>4</i><span>Each village is matched to an account by its tag automatically.</span></div></div>'}
+function vSet(){
+  return'<div class="large">Settings</div><div class="sub">Make it yours</div><div class="hd">Appearance</div><div class="grp"><div class="li"><div class="sw">'+["dark","light","system"].map(function(t){return'<button class="'+(S.theme===t?'on':'')+'" data-th="'+t+'">'+t[0].toUpperCase()+t.slice(1)+'</button>'}).join("")+'</div></div></div><div class="hd">Account names</div><div class="grp">'+S.accs.map(function(a,i){return'<div class="li"><input data-nm="'+i+'" maxlength="14" value="'+esc(a.name)+'"></div>'}).join("")+'</div><div class="hd">Data</div><div class="grp"><div class="li"><button class="btn ghost" style="padding:2px" data-act="demo">Load sample data</button></div></div><button class="btn red" data-act="clr">'+(arm?'Tap again to confirm':'Clear all data')+'</button><div class="hd">About</div><div class="grp"><div class="li"><span>Version</span><span class="s">2.1</span></div><div class="li" style="display:block"><span class="s">Add the Village Tracker widget from your home screen to see the next finishing timer for every account.</span></div></div>';
+}
+function show(anim){
+  $("nav").innerHTML=tabsHtml();var v=$("view");
+  v.innerHTML={home:vHome,accts:vAccts,imp:vImp,set:vSet}[S.tab]();
+  v.className=anim?"a":"";if(anim)v.scrollTop=0;
+}
+function load(txt){
+  var e=$("err");if(e)e.hidden=true;
+  try{var nd=parse(txt.trim()),f=-1,i,k;
+    if(nd.tag)for(i=0;i<6;i++){var x=S.accs[i].data;if(x&&x.tag===nd.tag){f=i;break}}
+    if(f<0)for(k=0;k<6;k++)if(!S.accs[k].data){f=k;break}
+    if(f<0)f=S.cur;
+    S.cur=f;S.accs[f].data=nd;S.tab="accts";save();show(true);
+  }catch(ex){if(e){e.textContent="Could not read the data. Copy it again in the game and retry.";e.hidden=false}}
+}
+$("view").addEventListener("click",function(ev){
+  var el=ev.target.closest("[data-go],[data-act],[data-th]");if(!el)return;
+  if(el.dataset.go!=null){S.cur=+el.dataset.go;S.tab="accts";save();show(true);return}
+  if(el.dataset.th){S.theme=el.dataset.th;theme();save();show();return}
+  var a=el.dataset.act;
+  if(a==="imp"){S.tab="imp";show(true)}
+  else if(a==="demo"){demo()}
+  else if(a==="manual"){$("box").hidden=!$("box").hidden}
+  else if(a==="load"){load($("ta").value)}
+  else if(a==="paste"){
+    if(window.AndroidClip)load(AndroidClip.get());
+    else if(navigator.clipboard&&navigator.clipboard.readText)navigator.clipboard.readText().then(load).catch(function(){$("box").hidden=false});
+    else $("box").hidden=false;
+  }else if(a==="clr"){if(!arm){arm=1;show();return}arm=0;S.accs.forEach(function(x){x.data=null});save();S.tab="home";show(true)}
+});
+$("view").addEventListener("input",function(ev){var i=ev.target.dataset.nm;if(i==null)return;S.accs[+i].name=ev.target.value||("Account "+(+i+1));save()});
+$("nav").addEventListener("click",function(ev){var b=ev.target.closest("[data-tab]");if(!b)return;S.tab=b.dataset.tab;arm=0;save();show(true)});
+function onboard(){
+  var P=[["\u23f3","Track every village","Import your Clash of Clans data and see every upgrade timer in one place."],["\ud83d\udc65","Six accounts, one view","Villages are matched by tag. Switch accounts with a single tap."],["\ud83e\udde9","Widget on your home screen","See the next finishing timer for all six accounts without opening the app."]];
+  var p=P[slide];
+  $("ob").innerHTML='<div class="orb">'+p[0]+'</div><h2>'+p[1]+'</h2><p>'+p[2]+'</p><div class="dots">'+P.map(function(_,i){return'<i class="'+(i===slide?'on':'')+'"></i>'}).join("")+'</div><button class="btn fill" style="max-width:320px;margin:0" id="nx">'+(slide===2?"Get Started":"Next")+'</button>';
+  $("nx").onclick=function(){if(slide<2){slide++;onboard()}else{S.ob=1;save();$("ob").hidden=true;$("main").hidden=false;show(true)}};
+}
+try{var raw=localStorage.getItem("village-v3");if(raw){var o=JSON.parse(raw);if(o&&o.accs&&o.accs.length===6)S=o}}catch(e){}
+theme();save();
+$("splash").innerHTML=LOGO+'<div class="brand">Village</div>';
+setTimeout(function(){$("splash").hidden=true;if(S.ob){$("main").hidden=false;show(true)}else{$("ob").hidden=false;onboard()}},1100);
+setInterval(function(){var n=Date.now();document.querySelectorAll("[data-end]").forEach(function(el){var l=+el.dataset.end-n;el.textContent=fmt(l);el.classList.toggle("d",l<=0)})},1000);
+</script></body></html>
