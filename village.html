@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000"><title>Village</title>
+<style>
+:root{--bg:#000;--c:#1c1c1e;--c2:#2c2c2e;--sep:#38383a;--t:#fff;--s:#8e8e93;--b:#0a84ff;--g:#30d158;--o:#ff9f0a;--r:#ff453a;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg)}
+body{color:var(--t);font:16px/1.4 -apple-system,"SF Pro Text",Roboto,"Helvetica Neue",Arial,sans-serif;padding:14px 16px 56px;max-width:640px;margin:0 auto;-webkit-font-smoothing:antialiased}
+.large{font-size:2.15rem;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+.sub{color:var(--s);font-size:.82rem;margin:2px 0 14px}
+.seg{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:999px;padding:8px 15px;background:var(--c);color:var(--t);font-size:.86rem;font-weight:600}
+.chip.on{background:var(--b)}
+.chip small{opacity:.7;margin-left:4px}
+.hd{font-size:.74rem;color:var(--s);text-transform:uppercase;letter-spacing:.06em;margin:0 16px 7px}
+.grp{background:var(--c);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:.5px solid var(--sep)}
+.li:first-child{border-top:0}
+.n{font-weight:600;font-size:1rem}.s{color:var(--s);font-size:.78rem;font-weight:400}
+.tm{font-weight:700;font-variant-numeric:tabular-nums;color:var(--o);text-align:right;white-space:nowrap}
+.tm.d{color:var(--g)}.tm.x{color:var(--s)}
+.pg{height:4px;background:var(--c2);border-radius:2px;margin-top:8px;overflow:hidden}
+.pg i{display:block;height:100%;background:var(--o);border-radius:2px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.tile{background:var(--c);border-radius:14px;padding:12px 8px;text-align:center}
+.tile b{display:block;font-size:1.55rem;font-weight:800;letter-spacing:-.02em}
+.tile span{font-size:.68rem;color:var(--s);font-weight:600}
+.btn{border:0;background:none;color:var(--b);font-size:1rem;font-weight:600;padding:0;text-align:left;width:100%}
+.btn.red{color:var(--r)}.btn.fill{background:var(--b);color:#fff;border-radius:12px;padding:13px;text-align:center;margin-top:10px}
+input,textarea{width:100%;border:0;border-radius:10px;background:var(--c2);color:var(--t);font:inherit;padding:10px 12px}
+textarea{height:96px;font-size:.8rem}
+.err{color:var(--r);font-size:.86rem;margin:-10px 16px 16px}
+.empty{color:var(--s);text-align:center;padding:26px 10px}
+.chev{color:var(--sep);font-size:1.3rem;margin-left:6px}
+</style></head><body>
+<div class="large">Village</div>
+<div class="sub" id="upd">No data yet</div>
+<div class="seg" id="tabs"></div>
+<div id="nmc"><div class="hd">Account name</div><div class="grp"><div class="li"><input id="nm" maxlength="14" placeholder="Account name"></div></div></div>
+<div class="hd">Import</div>
+<div class="grp">
+<div class="li"><button class="btn" id="paste">Import from Clipboard</button></div>
+<div class="li"><button class="btn" id="manual">Paste manually</button></div>
+<div class="li" id="clrw"><button class="btn red" id="clr">Clear this account</button></div>
+</div>
+<div class="grp" id="box" hidden><div class="li" style="display:block"><textarea id="ta" placeholder="Paste village JSON here"></textarea><button class="btn fill" id="load">Load</button></div></div>
+<div class="err" id="err" hidden></div>
+<div id="app"></div>
+<div class="hd">How it works</div>
+<div class="grp"><div class="li" style="display:block;color:var(--s);font-size:.86rem">In Clash of Clans open Settings, then Data Export, then tap Copy. Come back here and tap Import from Clipboard. Each village is matched to an account by its tag. Add the Village Tracker widget from your home screen to see all six builder timers.</div></div>
+<script>
+var CAT={buildings:"Buildings",heroes:"Heroes",units:"Lab: Troops",siege_machines:"Lab: Siege",spells:"Lab: Spells",pets:"Pets",equipment:"Equipment",traps:"Traps",buildings2:"Builder Base",heroes2:"Builder Heroes",units2:"Builder Troops"};
+var NAMES={1000001:"Town Hall",28000000:"Barbarian King",28000001:"Archer Queen",28000002:"Grand Warden",28000004:"Royal Champion",28000006:"Minion Prince",4000000:"Barbarian",4000001:"Archer",4000002:"Goblin",4000003:"Giant",4000004:"Wall Breaker",4000005:"Balloon",4000006:"Wizard",4000007:"Healer",4000008:"Dragon",4000009:"P.E.K.K.A",4000010:"Minion",4000011:"Hog Rider",4000012:"Valkyrie",4000013:"Golem",4000015:"Witch",4000017:"Lava Hound",4000022:"Bowler",4000023:"Baby Dragon",4000024:"Miner",4000031:"Electro Dragon",26000000:"Lightning Spell",26000001:"Healing Spell",26000002:"Rage Spell",26000003:"Jump Spell",26000005:"Freeze Spell",26000009:"Poison Spell",26000010:"Earthquake Spell",26000011:"Haste Spell",26000016:"Clone Spell",26000017:"Skeleton Spell",26000028:"Bat Spell"};
+var HEROES={28000000:1,28000001:1,28000002:1,28000004:1,28000006:1},BK={buildings:1,heroes:1,buildings2:1,heroes2:1};
+var S={accs:[],cur:0},sig="",arm=0;
+for(var q=0;q<6;q++)S.accs.push({name:"Account "+(q+1),data:null});
+function $(i){return document.getElementById(i)}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(ms){if(ms<=0)return"End";var s=Math.floor(ms/1e3),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?d+"d "+h+"h "+m+"m":h?h+"h "+m+"m":m+"m "+(s%60)+"s"}
+function dt(ms,o){return new Date(ms).toLocaleString([],o||{weekday:"short",hour:"numeric",minute:"2-digit"})}
+function save(){
+  try{localStorage.setItem("village-v2",JSON.stringify(S))}catch(e){}
+  try{if(window.AndroidClip&&AndroidClip.saveWidget)AndroidClip.saveWidget(JSON.stringify(S.accs.map(function(a){return{n:a.name,e:a.data?a.data.track:0}})))}catch(e){}
+}
+function parse(txt){
+  var j=JSON.parse(txt),ts=j.timestamp||Math.floor(Date.now()/1e3),ups=[],heroes=[],th=0,counts={},track=0;
+  Object.keys(j).forEach(function(k){var a=j[k];if(!Array.isArray(a))return;
+    a.forEach(function(it){if(!it||typeof it!=="object"||it.data==null)return;
+      var nm=NAMES[it.data]||("Item #"+it.data);counts[k]=(counts[k]||0)+(it.cnt||1);
+      if(it.data===1000001)th=it.lvl;
+      if(HEROES[it.data])heroes.push({name:nm,lvl:it.lvl,timer:it.timer||0});
+      if(it.timer>0){var e=(ts+it.timer)*1e3;ups.push({name:nm,cat:CAT[k]||k,lvl:it.lvl,total:it.timer,end:e});if(BK[k]&&(!track||e<track))track=e}
+    })});
+  return{tag:j.tag||"",th:th,ts:ts*1e3,ups:ups,heroes:heroes,counts:counts,track:track};
+}
+function tabs(){
+  var s=S.cur+"|"+S.accs.map(function(a){return a.name+(a.data?a.data.th:"")}).join("|");
+  $("nmc").hidden=S.cur<0;$("clrw").hidden=S.cur<0;
+  if(s===sig)return;sig=s;
+  var h='<button class="chip '+(S.cur<0?'on':'')+'" data-i="-1">All</button>';
+  S.accs.forEach(function(a,i){h+='<button class="chip '+(S.cur===i?'on':'')+'" data-i="'+i+'">'+esc(a.name)+(a.data&&a.data.th?'<small>TH'+a.data.th+'</small>':'')+'</button>'});
+  $("tabs").innerHTML=h;
+  if(S.cur>=0&&document.activeElement!==$("nm"))$("nm").value=S.accs[S.cur].name;
+}
+function overview(){
+  var now=Date.now();$("upd").textContent="Next builder to finish, per account";
+  var h='<div class="hd">Accounts</div><div class="grp">';
+  S.accs.forEach(function(a,i){var d=a.data,sub="No data",t='<span class="tm x">&mdash;</span>';
+    if(d){var act=d.ups.filter(function(u){return u.end>now}).length;sub="TH"+(d.th||"?")+" &middot; "+act+" upgrading";
+      if(d.track)t='<span class="tm '+(d.track<=now?'d':'')+'">'+fmt(d.track-now)+'</span>'}
+    h+='<div class="li" data-i="'+i+'"><div><div class="n">'+esc(a.name)+'</div><div class="s">'+sub+'</div></div><div style="display:flex;align-items:center">'+t+'<span class="chev">&rsaquo;</span></div></div>'});
+  $("app").innerHTML=h+'</div>';
+}
+function render(){
+  tabs();if(S.cur<0){overview();return}
+  var D=S.accs[S.cur].data;
+  if(!D){$("upd").textContent="No data for this account";$("app").innerHTML='<div class="empty">Import your village to see it here.</div>';return}
+  var now=Date.now(),ups=D.ups.slice().sort(function(a,b){return a.end-b.end}),act=ups.filter(function(u){return u.end>now});
+  $("upd").textContent="Snapshot "+dt(D.ts,{dateStyle:"medium",timeStyle:"short"})+(D.tag?" \u00b7 "+D.tag:"");
+  var h='<div class="tiles"><div class="tile"><b>'+(D.th||"?")+'</b><span>TOWN HALL</span></div><div class="tile"><b>'+act.length+'</b><span>UPGRADING</span></div><div class="tile"><b>'+(ups.length-act.length)+'</b><span>FINISHED</span></div></div>';
+  h+='<div class="hd">Upgrade timers</div><div class="grp">';
+  if(!ups.length)h+='<div class="li"><span class="s">No upgrades running</span></div>';
+  ups.forEach(function(u){var left=u.end-now,p=Math.min(100,Math.max(0,100-left/(u.total*1e3)*100));
+    h+='<div class="li"><div style="flex:1;min-width:0"><div class="n">'+esc(u.name)+' <span class="s">to Lv '+(u.lvl+1)+'</span></div><div class="s">'+esc(u.cat)+' &middot; ends '+dt(u.end)+'</div><div class="pg"><i style="width:'+p+'%"></i></div></div><div class="tm '+(left<=0?'d':'')+'">'+fmt(left)+'</div></div>'});
+  h+='</div>';
+  if(D.heroes.length){h+='<div class="hd">Heroes</div><div class="grp">';
+    D.heroes.forEach(function(x){h+='<div class="li"><span class="n">'+esc(x.name)+'</span><span class="s">Level '+x.lvl+(x.timer>0?' &middot; upgrading':'')+'</span></div>'});h+='</div>'}
+  var ck=Object.keys(D.counts);
+  if(ck.length){h+='<div class="hd">Overview</div><div class="grp">';
+    ck.forEach(function(k){h+='<div class="li"><span>'+esc(CAT[k]||k)+'</span><span class="s">'+D.counts[k]+'</span></div>'});h+='</div>'}
+  $("app").innerHTML=h;
+}
+function go(txt){
+  var e=$("err");e.hidden=true;
+  try{var nd=parse(txt.trim()),f=-1,i,k;
+    if(nd.tag)for(i=0;i<6;i++){var x=S.accs[i].data;if(x&&x.tag===nd.tag){f=i;break}}
+    if(f<0){var c=S.cur>=0?S.accs[S.cur].data:null;if(S.cur>=0&&(!c||!c.tag))f=S.cur;else for(k=0;k<6;k++)if(!S.accs[k].data){f=k;break}}
+    if(f<0)f=S.cur>=0?S.cur:0;
+    S.cur=f;S.accs[f].data=nd;save();sig="";$("box").hidden=true;render();
+  }catch(ex){e.textContent="Could not read the data. Copy it again in the game and retry.";e.hidden=false}
+}
+function pick(e){var el=e.target.closest("[data-i]");if(!el)return;S.cur=+el.getAttribute("data-i");save();sig="";arm=0;$("clr").textContent="Clear this account";render()}
+$("tabs").onclick=pick;$("app").onclick=pick;
+$("paste").onclick=function(){
+  if(window.AndroidClip){go(window.AndroidClip.get())}
+  else if(navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(go).catch(function(){$("box").hidden=false})}
+  else{$("box").hidden=false}
+};
+$("manual").onclick=function(){$("box").hidden=!$("box").hidden};
+$("load").onclick=function(){go($("ta").value)};
+$("clr").onclick=function(){if(S.cur<0)return;if(!arm){arm=1;$("clr").textContent="Tap again to confirm";return}arm=0;$("clr").textContent="Clear this account";S.accs[S.cur].data=null;save();sig="";render()};
+$("nm").oninput=function(){if(S.cur<0)return;S.accs[S.cur].name=this.value||("Account "+(S.cur+1));save();render()};
+try{var raw=localStorage.getItem("village-v2");if(raw){var o=JSON.parse(raw);if(o&&o.accs&&o.accs.length===6)S=o}}catch(e){}
+save();render();setInterval(render,1000);
+</script></body></html>
