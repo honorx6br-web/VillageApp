@@ -38,7 +38,7 @@ jobs:
           dependencyResolutionManagement {
             repositories { google(); mavenCentral() }
           }
-          rootProject.name = "VillageTracker"
+          rootProject.name = "Tissue"
           include(":app")
           EOF
 
@@ -60,8 +60,8 @@ jobs:
               applicationId 'com.village.tracker'
               minSdk 26
               targetSdk 34
-              versionCode 3
-              versionName '2.1'
+              versionCode 4
+              versionName '2.2'
             }
             compileOptions {
               sourceCompatibility JavaVersion.VERSION_17
@@ -76,7 +76,7 @@ jobs:
             <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32"/>
             <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
             <application
-              android:label="Village Tracker"
+              android:label="Tissue"
               android:icon="@mipmap/ic_launcher"
               android:roundIcon="@mipmap/ic_launcher"
               android:theme="@style/AppTheme"
@@ -122,9 +122,9 @@ jobs:
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
             android:width="108dp" android:height="108dp"
             android:viewportWidth="108" android:viewportHeight="108">
-            <path android:fillColor="#24427A" android:pathData="M0,0h108v108h-108z"/>
-            <path android:fillColor="#14243D" android:pathData="M0,54h108v54h-108z"/>
-            <path android:fillColor="#1B3560" android:pathData="M0,0h108v54h-108z"/>
+            <path android:fillColor="#0E1A2E" android:pathData="M0,0h108v108h-108z"/>
+            <path android:fillColor="#1B3560" android:fillAlpha="0.8" android:pathData="M0,0 L108,0 L108,44 L0,78 Z"/>
+            <path android:fillColor="#24427A" android:fillAlpha="0.5" android:pathData="M54,54 m-34,0 a34,34 0 1,0 68,0 a34,34 0 1,0 -68,0"/>
           </vector>
           EOF
 
@@ -132,10 +132,9 @@ jobs:
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
             android:width="108dp" android:height="108dp"
             android:viewportWidth="108" android:viewportHeight="108">
-            <path android:fillColor="#0A1220" android:pathData="M54,27 L80,36 L80,59 C80,73 68,83 54,89 C40,83 28,73 28,59 L28,36 Z"/>
-            <path android:fillColor="#FFC83D" android:pathData="M54,24 L80,33 L80,56 C80,70 68,80 54,86 C40,80 28,70 28,56 L28,33 Z"/>
-            <path android:fillColor="#F0960A" android:pathData="M54,29 L75,36 L75,55 C75,66 66,74 54,80 C42,74 33,66 33,55 L33,36 Z"/>
-            <path android:strokeColor="#14243D" android:strokeWidth="7" android:strokeLineCap="round" android:pathData="M43,46 L65,46 M54,46 L54,66"/>
+            <path android:fillColor="#FFC83D" android:pathData="M38,47 L41,35 L48,41 L54,31 L60,41 L67,35 L70,47 Z"/>
+            <path android:strokeColor="#FFC83D" android:strokeAlpha="0.5" android:strokeWidth="1" android:pathData="M30,53.5 H78"/>
+            <path android:strokeColor="#FFC83D" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M27.5,72 L27.5,58 L32.5,58 C36,58 36,64.5 32.5,64.5 L27.5,64.5 M31.5,64.5 L35.5,72 M38.5,72 L42.5,58 L46.5,72 M40.1,67.5 L44.9,67.5 M49.5,58 L49.5,72 M57.5,58 L50.5,65.5 M52.5,63.5 L57.5,72 M62,58 L67,58 M64.5,58 L64.5,72 M62,72 L67,72 M71.5,58 L71.5,72 M71.5,58 L76.5,58 C80,58 80,64.5 76.5,64.5 L71.5,64.5 M76.5,64.5 C80.5,64.5 80.5,72 76.5,72 L71.5,72"/>
           </vector>
           EOF
 
@@ -355,11 +354,11 @@ jobs:
         run: gradle assembleDebug --no-daemon
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk VillageTracker.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk Tissue.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: Village Tracker v${{ github.run_number }}
-          files: VillageTracker.apk
+          name: Tissue v${{ github.run_number }}
+          files: Tissue.apk
