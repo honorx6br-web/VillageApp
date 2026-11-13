@@ -27,7 +27,10 @@ jobs:
         run: |
           mkdir -p app/src/main/assets app/src/main/java/com/village/tracker
           mkdir -p app/src/main/res/values app/src/main/res/drawable app/src/main/res/mipmap-anydpi-v26
-          cp index.html app/src/main/assets/index.html
+          mkdir -p app/src/main/res/layout app/src/main/res/xml
+          src=village.html
+          [ -f "$src" ] || src=$(ls village*.html | head -n 1)
+          cp "$src" app/src/main/assets/index.html
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -58,8 +61,8 @@ jobs:
               applicationId 'com.village.tracker'
               minSdk 26
               targetSdk 34
-              versionCode 1
-              versionName '1.0'
+              versionCode 2
+              versionName '2.0'
             }
             compileOptions {
               sourceCompatibility JavaVersion.VERSION_17
@@ -86,6 +89,12 @@ jobs:
                   <category android:name="android.intent.category.LAUNCHER"/>
                 </intent-filter>
               </activity>
+              <receiver android:name=".VillageWidget" android:exported="false">
+                <intent-filter>
+                  <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                </intent-filter>
+                <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info"/>
+              </receiver>
             </application>
           </manifest>
           EOF
@@ -93,9 +102,9 @@ jobs:
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
             <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
-              <item name="android:statusBarColor">#10192B</item>
-              <item name="android:navigationBarColor">#10192B</item>
-              <item name="android:windowBackground">#10192B</item>
+              <item name="android:statusBarColor">#000000</item>
+              <item name="android:navigationBarColor">#000000</item>
+              <item name="android:windowBackground">#000000</item>
             </style>
           </resources>
           EOF
@@ -129,6 +138,149 @@ jobs:
           </vector>
           EOF
 
+          cat > app/src/main/res/drawable/widget_bg.xml <<'EOF'
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+            <solid android:color="#F01C1C1E"/>
+            <corners android:radius="24dp"/>
+          </shape>
+          EOF
+
+          cat > app/src/main/res/xml/widget_info.xml <<'EOF'
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+            android:minWidth="250dp"
+            android:minHeight="250dp"
+            android:updatePeriodMillis="1800000"
+            android:initialLayout="@layout/widget"
+            android:resizeMode="horizontal|vertical"
+            android:widgetCategory="home_screen"/>
+          EOF
+
+          {
+          echo '<?xml version="1.0" encoding="utf-8"?>'
+          echo '<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="14dp" android:background="@drawable/widget_bg">'
+          echo '<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="BUILDER TIMERS" android:textSize="11sp" android:textColor="#8E8E93" android:textStyle="bold" android:letterSpacing="0.1" android:paddingBottom="4dp"/>'
+          for i in 1 2 3 4 5 6; do
+          echo '<LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal">'
+          echo '<LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">'
+          echo '<TextView android:id="@+id/n'$i'" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="14sp" android:textStyle="bold" android:maxLines="1"/>'
+          echo '<TextView android:id="@+id/s'$i'" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#8E8E93" android:textSize="11sp" android:maxLines="1"/>'
+          echo '</LinearLayout>'
+          echo '<FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content">'
+          echo '<Chronometer android:id="@+id/t'$i'" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FF9F0A" android:textSize="15sp" android:textStyle="bold"/>'
+          echo '<TextView android:id="@+id/e'$i'" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#30D158" android:textSize="15sp" android:textStyle="bold"/>'
+          echo '</FrameLayout>'
+          echo '</LinearLayout>'
+          done
+          echo '</LinearLayout>'
+          } > app/src/main/res/layout/widget.xml
+
+          cat > app/src/main/java/com/village/tracker/VillageWidget.java <<'EOF'
+          package com.village.tracker;
+
+          import android.app.AlarmManager;
+          import android.app.PendingIntent;
+          import android.appwidget.AppWidgetManager;
+          import android.appwidget.AppWidgetProvider;
+          import android.content.ComponentName;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.os.SystemClock;
+          import android.view.View;
+          import android.widget.RemoteViews;
+          import java.text.SimpleDateFormat;
+          import java.util.Date;
+          import java.util.Locale;
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+
+          public class VillageWidget extends AppWidgetProvider {
+            static final String REFRESH = "com.village.tracker.REFRESH";
+            static final int[] N = {R.id.n1, R.id.n2, R.id.n3, R.id.n4, R.id.n5, R.id.n6};
+            static final int[] S = {R.id.s1, R.id.s2, R.id.s3, R.id.s4, R.id.s5, R.id.s6};
+            static final int[] T = {R.id.t1, R.id.t2, R.id.t3, R.id.t4, R.id.t5, R.id.t6};
+            static final int[] E = {R.id.e1, R.id.e2, R.id.e3, R.id.e4, R.id.e5, R.id.e6};
+
+            static JSONArray load(Context c) {
+              try {
+                return new JSONArray(c.getSharedPreferences("v", 0).getString("w", "[]"));
+              } catch (Exception x) {
+                return new JSONArray();
+              }
+            }
+
+            @Override
+            public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
+              for (int id : ids) m.updateAppWidget(id, build(c));
+              schedule(c);
+            }
+
+            @Override
+            public void onReceive(Context c, Intent i) {
+              super.onReceive(c, i);
+              if (REFRESH.equals(i.getAction())) {
+                AppWidgetManager m = AppWidgetManager.getInstance(c);
+                int[] ids = m.getAppWidgetIds(new ComponentName(c, VillageWidget.class));
+                onUpdate(c, m, ids);
+              }
+            }
+
+            static RemoteViews build(Context c) {
+              RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget);
+              v.setOnClickPendingIntent(R.id.root,
+                PendingIntent.getActivity(c, 0, new Intent(c, MainActivity.class), PendingIntent.FLAG_IMMUTABLE));
+              JSONArray a = load(c);
+              long now = System.currentTimeMillis();
+              SimpleDateFormat f = new SimpleDateFormat("EEE h:mm a", Locale.getDefault());
+              for (int i = 0; i < 6; i++) {
+                String name = "Account " + (i + 1);
+                long e = 0;
+                JSONObject o = a.optJSONObject(i);
+                if (o != null) {
+                  name = o.optString("n", name);
+                  e = o.optLong("e", 0);
+                }
+                v.setTextViewText(N[i], name);
+                v.setViewVisibility(T[i], View.GONE);
+                v.setViewVisibility(E[i], View.VISIBLE);
+                if (e <= 0) {
+                  v.setTextViewText(E[i], "\u2014");
+                  v.setTextColor(E[i], 0xFF8E8E93);
+                  v.setTextViewText(S[i], "No timer");
+                } else if (e <= now) {
+                  v.setTextViewText(E[i], "End");
+                  v.setTextColor(E[i], 0xFF30D158);
+                  v.setTextViewText(S[i], "Finished " + f.format(new Date(e)));
+                } else {
+                  v.setViewVisibility(E[i], View.GONE);
+                  v.setViewVisibility(T[i], View.VISIBLE);
+                  v.setChronometerCountDown(T[i], true);
+                  v.setChronometer(T[i], SystemClock.elapsedRealtime() + (e - now), null, true);
+                  v.setTextViewText(S[i], "Ends " + f.format(new Date(e)));
+                }
+              }
+              return v;
+            }
+
+            static void schedule(Context c) {
+              JSONArray a = load(c);
+              long now = System.currentTimeMillis();
+              long next = 0;
+              for (int i = 0; i < a.length(); i++) {
+                JSONObject o = a.optJSONObject(i);
+                long e = o == null ? 0 : o.optLong("e", 0);
+                if (e > now && (next == 0 || e < next)) next = e;
+              }
+              AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+              PendingIntent p = PendingIntent.getBroadcast(c, 1,
+                new Intent(c, VillageWidget.class).setAction(REFRESH),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+              if (am == null) return;
+              if (next > 0) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next + 1000, p);
+              else am.cancel(p);
+            }
+          }
+          EOF
+
           cat > app/src/main/java/com/village/tracker/MainActivity.java <<'EOF'
           package com.village.tracker;
 
@@ -136,6 +288,7 @@ jobs:
           import android.content.ClipData;
           import android.content.ClipboardManager;
           import android.content.Context;
+          import android.content.Intent;
           import android.os.Bundle;
           import android.webkit.JavascriptInterface;
           import android.webkit.WebSettings;
@@ -145,7 +298,7 @@ jobs:
           public class MainActivity extends Activity {
             private WebView web;
 
-            private class Clip {
+            private class Bridge {
               @JavascriptInterface
               public String get() {
                 ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -154,6 +307,12 @@ jobs:
                 if (d == null || d.getItemCount() == 0) return "";
                 CharSequence t = d.getItemAt(0).coerceToText(MainActivity.this);
                 return t == null ? "" : t.toString();
+              }
+
+              @JavascriptInterface
+              public void saveWidget(String json) {
+                getSharedPreferences("v", 0).edit().putString("w", json).apply();
+                sendBroadcast(new Intent(MainActivity.this, VillageWidget.class).setAction(VillageWidget.REFRESH));
               }
             }
 
@@ -165,8 +324,8 @@ jobs:
               WebSettings s = web.getSettings();
               s.setJavaScriptEnabled(true);
               s.setDomStorageEnabled(true);
-              web.setBackgroundColor(0xFF10192B);
-              web.addJavascriptInterface(new Clip(), "AndroidClip");
+              web.setBackgroundColor(0xFF000000);
+              web.addJavascriptInterface(new Bridge(), "AndroidClip");
               web.setWebViewClient(new WebViewClient());
               web.loadUrl("file:///android_asset/index.html");
             }
